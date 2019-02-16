@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+}
+
+allprojects {
+    apply plugin: "idea"
+    apply plugin: "eclipse"
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "https://repository.apache.org/snapshots"
+    }
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+    maven {
+        url "https://oss.jfrog.org/jfrog-dependencies"
+    }
+}
+
+apply plugin: "java"
+apply plugin: "application"
+
+group 'io.pravega.benchmark-analysis'
+version loadtestAnalysisVersion
+
+sourceCompatibility = javaVersion
+archivesBaseName = 'pravega-benchmark-analysis'
+applicationDefaultJvmArgs = ["-Dlogback.configurationFile=file:conf/logback.xml"]
+mainClassName = 'io.pravega.benchmark.analysis.AppMain'
+
+dependencies {
+
+    compile "org.apache.flink:flink-streaming-java_2.11:${flinkVersion}"
+    compile "org.apache.flink:flink-streaming-scala_2.11:${flinkVersion}"
+    
+    compile group: 'org.apache.commons', name: 'commons-csv', version: apacheCommonsCsvVersion
+
+    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4jApiVersion
+
+    compileOnly group: 'org.projectlombok', name:'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name:'lombok', version: lombokVersion
+
+}
+
+distributions {
+    main {
+        baseName = archivesBaseName
+        contents {
+            into('lib') {
+                from(project.configurations.runtime)
+                from(jar)
+            }
+            into('conf') {
+                from(project.file('src/main/resources/logback.xml'))
+            }
+        }
+    }
+}
+
