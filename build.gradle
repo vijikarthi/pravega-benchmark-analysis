@@ -51,6 +51,12 @@ dependencies {
     compileOnly group: 'org.projectlombok', name:'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name:'lombok', version: lombokVersion
 
+    compile "io.pravega:pravega-connectors-flink_2.11:${flinkConnectorVersion}"
+    compile "org.apache.flink:flink-streaming-java_2.11:${flinkVersion}"
+    compile "org.apache.flink:flink-streaming-scala_2.11:${flinkVersion}"
+
+    compile files('/data1/workspace/vijikarthi-github/pravega-benchmark/build/libs/pravega-benchmark-1.0-SNAPSHOT.jar')
+
 }
 
 distributions {

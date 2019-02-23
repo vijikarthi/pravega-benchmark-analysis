@@ -7,12 +7,13 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.io.FileReader;
 import java.io.Reader;
-import java.time.Instant;
+
+import static io.pravega.benchmark.analysis.ioformat.CsvInputFormat.HEADERS;
+import static io.pravega.benchmark.analysis.ioformat.CsvInputFormat.parseInputData;
 
 @Slf4j
 public class InputDataSource implements SourceFunction<InputData> {
 
-    public static String[] HEADERS = {"runMode", "eventSize", "eventTime", "startTime", "endTime", "latencyInMilliSec"};
     private String csvFilePath;
 
     public InputDataSource(String csvFilePath) {
@@ -27,21 +28,7 @@ public class InputDataSource implements SourceFunction<InputData> {
                     .withFirstRecordAsHeader()
                     .parse(in);
             for (CSVRecord record : records) {
-                String runMode = record.get("runMode");
-                int eventSize = Integer.parseInt(record.get("eventSize"));
-                Instant eventTime = Instant.parse(record.get("eventTime"));
-                Instant startTime = Instant.parse(record.get("startTime"));
-                Instant endTime = Instant.parse(record.get("endTime"));
-                long latency = Long.parseLong(record.get("latencyInMilliSec"));
-                InputData inputData = InputData.builder()
-                        .runMode(runMode)
-                        .eventSize(eventSize)
-                        .eventTime(eventTime)
-                        .startTime(startTime)
-                        .endTime(endTime)
-                        .latency(latency)
-                        .build();
-                ctx.collect(inputData);
+                ctx.collect(parseInputData(record));
             }
         }
     }

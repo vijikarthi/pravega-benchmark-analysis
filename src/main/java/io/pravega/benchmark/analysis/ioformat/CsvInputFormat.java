@@ -18,13 +18,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.pravega.benchmark.analysis.InputDataSource.HEADERS;
-
 public class CsvInputFormat extends RichInputFormat<InputData, CsvInputSplit> {
 
     private Reader inputReader;
     private Iterator<CSVRecord> recordsIterator;
     private String csvFilePath;
+    public static String[] HEADERS = {"runMode", "appId", "threadId", "eventKey", "eventSize", "eventTime", "startTime", "endTime", "latencyInMilliSec"};
 
     public CsvInputFormat(String csvFilePath) {
         this.csvFilePath = csvFilePath;
@@ -80,21 +79,7 @@ public class CsvInputFormat extends RichInputFormat<InputData, CsvInputSplit> {
     @Override
     public InputData nextRecord(InputData reuse) throws IOException {
         CSVRecord record = recordsIterator.next();
-        String runMode = record.get("runMode");
-        int eventSize = Integer.parseInt(record.get("eventSize"));
-        Instant eventTime = Instant.parse(record.get("eventTime"));
-        Instant startTime = Instant.parse(record.get("startTime"));
-        Instant endTime = Instant.parse(record.get("endTime"));
-        long latency = Long.parseLong(record.get("latencyInMilliSec"));
-        InputData inputData = InputData.builder()
-                .runMode(runMode)
-                .eventSize(eventSize)
-                .eventTime(eventTime)
-                .startTime(startTime)
-                .endTime(endTime)
-                .latency(latency)
-                .build();
-        return inputData;
+        return parseInputData(record);
     }
 
     @Override
@@ -102,5 +87,29 @@ public class CsvInputFormat extends RichInputFormat<InputData, CsvInputSplit> {
         if (inputReader != null) {
             inputReader.close();
         }
+    }
+
+    public static InputData parseInputData(CSVRecord record) {
+        String runMode = record.get("runMode");
+        String appId = record.get("appId");
+        String threadId = record.get("threadId");
+        String eventKey = record.get("eventKey");
+        int eventSize = Integer.parseInt(record.get("eventSize"));
+        Instant eventTime = Instant.parse(record.get("eventTime"));
+        Instant startTime = Instant.parse(record.get("startTime"));
+        Instant endTime = Instant.parse(record.get("endTime"));
+        long latency = Long.parseLong(record.get("latencyInMilliSec"));
+        InputData inputData = InputData.builder()
+                .runMode(runMode)
+                .appId(appId)
+                .threadId(threadId)
+                .eventKey(eventKey)
+                .eventSize(eventSize)
+                .eventTime(eventTime)
+                .startTime(startTime)
+                .endTime(endTime)
+                .latency(latency)
+                .build();
+        return inputData;
     }
 }
